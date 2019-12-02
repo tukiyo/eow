@@ -2,7 +2,11 @@
 
 set -euo pipefail
 
-source "${BASH_SOURCE[0]}.conf"
+if [ ! -e "${BASH_SOURCE[0]}.conf" ];then
+    source "/opt/eow/eow.conf" || source "/etc/eow.conf"
+else
+    source "${BASH_SOURCE[0]}.conf"
+fi
 
 function colorize() {
     if [ -z "${COLORLIZE}" ]
@@ -49,7 +53,9 @@ EOF
 function navigate() {
 
     function read_char() {
-        return 0
+        if [ $TOPPAGE_ONLY = "yes" ]; then
+            return 0
+        fi
         local next="$(echo "${1}" | grep "${EOW_NAVIGATE_NEXT}")"
         local prev="$(echo "${1}" | grep "${EOW_NAVIGATE_PREV}")"
         local char
@@ -144,9 +150,10 @@ function url() {
     printf "${EOW_URL_FORMAT}" "$(echo "${@}" | encode)" "${PAGE:-1}"
 }
 
-COLORLIZE=1
-PAGE=1
-SUBCOMMAND=navigate
+if [ $# -eq 0 ];then
+    help
+    exit 0
+fi
 
 while getopts 'cho:p:' OPT
 do
