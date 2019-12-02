@@ -3,12 +3,12 @@
 set -euo pipefail
 
 # read config file
-if [ -e "/etc/eow.conf" ];then
+if [ -e "${BASH_SOURCE[0]}.conf" ];then
+    source "${BASH_SOURCE[0]}.conf"
+elif [ -e "/etc/eow.conf" ];then
     source "/etc/eow.conf"
 elif [ -e "/opt/eow/eow.conf" ];then
     source "/opt/eow/eow.conf"
-elif [ -e "${BASH_SOURCE[0]}.conf" ];then
-    source "${BASH_SOURCE[0]}.conf"
 else
     echo "${BASH_SOURCE[0]}.conf not found."
     exit 1
