@@ -2,10 +2,16 @@
 
 set -euo pipefail
 
-if [ ! -e "${BASH_SOURCE[0]}.conf" ];then
-    source "/opt/eow/eow.conf" || source "/etc/eow.conf"
-else
+# read config file
+if [ -e "/etc/eow.conf" ];then
+    source "/etc/eow.conf"
+elif [ -e "/opt/eow/eow.conf" ];then
+    source "/opt/eow/eow.conf"
+elif [ -e "${BASH_SOURCE[0]}.conf" ];then
     source "${BASH_SOURCE[0]}.conf"
+else
+    echo "${BASH_SOURCE[0]}.conf not found."
+    exit 1
 fi
 
 function colorize() {
@@ -135,7 +141,10 @@ function query() {
 
 function render() {
     sed -e "1,/${EOW_RENDER_BEGIN}/d" -e "/${EOW_RENDER_END}/,\$d" |
-    w3m -dump -T 'text/html'
+    w3m -dump -cols ${COLS} -T 'text/html' \
+     | grep -v "単語帳$" \
+     | sed -e "s/｛[^｛｝]*｝//g" \
+     | sed -e "/^$/d"
 }
 
 function url() {
